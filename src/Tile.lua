@@ -24,9 +24,12 @@ function Tile:init(x, y, color, variety)
     self.y = (self.gridY - 1) * 32
 
     -- tile appearance/points
-    self.color = color
+    self.color = color==7 and 6 or color
     self.variety = variety
-    self.shine = math.random(6)==1 and true or false
+    self.shine = math.random(3)==1 and true or false
+    if self.shine then
+
+    end
 end
 
 function Tile:render(x, y)
@@ -43,7 +46,11 @@ function Tile:render(x, y)
 
     -- shinny effect if it shines
     if self.shine then
-        love.graphics.setColor( 1, 1, .7, .45)
-        love.graphics.rectangle( "fill", self.x + x + 2, self.y + y + 2, 28, 28, 5, 5)
+        love.graphics.setColor( 1, 1, 1, .9)
+        love.graphics.rectangle( "fill", self.x + x + 6, self.y + y + 11, 2, 8)
+        love.graphics.rectangle( "fill", self.x + x + 8, self.y + y + 6, 2, 2)
+        love.graphics.setColor( 1, 1, 1, .2)
+        love.graphics.rectangle( "fill", self.x + x + 1, self.y + y + 1, 30, 30, 5, 5)
+
     end
 end

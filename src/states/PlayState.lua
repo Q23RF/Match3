@@ -37,7 +37,6 @@ function PlayState:init()
     self.highlightedTile = nil
 
     self.score = 0
-    self.timer = 60
 
     -- set our Timer class to turn cursor highlight on and off
     Timer.every(0.5, function()
@@ -59,6 +58,7 @@ function PlayState:enter(params)
     
     -- grab level # from the params we're passed
     self.level = params.level
+    self.timer = 50 + 10 * self.level
 
     -- spawn a board and place it toward the right
     self.board = params.board or Board(VIRTUAL_WIDTH - 272, 16, self.level)
@@ -67,7 +67,7 @@ function PlayState:enter(params)
     self.score = params.score or 0
 
     -- score we have to reach to get to the next level
-    self.scoreGoal = self.level * 1.25 * 1000
+    self.scoreGoal = self.level * 0.75 * 1000 - 100
 end
 
 function PlayState:update(dt)
@@ -197,7 +197,7 @@ function PlayState:calculateMatches()
         -- add score for each match
         for k, match in pairs(matches) do
             for j, tile in pairs(match) do
-                self.score = self.score + tile.variety*20
+                self.score = self.score + tile.variety*30
             end
             self.timer = self.timer + 1
         end

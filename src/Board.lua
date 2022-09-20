@@ -33,7 +33,7 @@ function Board:initializeTiles()
         for tileX = 1, 8 do
             
             -- create a new tile at X,Y with a random color and variety
-            table.insert(self.tiles[tileY], Tile(tileX, tileY, math.random(18), math.random(math.min(6, self.level))))
+            table.insert(self.tiles[tileY], Tile(tileX, tileY, math.random(9)*2-1, math.random(math.min(6, self.level))))
         end
     end
 
@@ -70,6 +70,7 @@ function Board:calculateMatches()
                 matchNum = matchNum + 1
             else
 
+
                 -- set this as the new color we want to watch for
                 colorToMatch = self.tiles[y][x].color
 
@@ -79,9 +80,13 @@ function Board:calculateMatches()
 
                     -- go backwards from here by matchNum
                     for x2 = x - 1, x - matchNum, -1 do
-                        
-                        -- add each tile to the match that's in that match
-                        table.insert(match, self.tiles[y][x2])
+                        if self.tiles[y][x2].shine then
+                            match = self.tiles[y]
+                            break
+                        else
+                            -- add each tile to the match that's in that match
+                            table.insert(match, self.tiles[y][x2])
+                        end
                     end
 
                     -- add this match to our total matches table
@@ -127,7 +132,13 @@ function Board:calculateMatches()
                     local match = {}
 
                     for y2 = y - 1, y - matchNum, -1 do
-                        table.insert(match, self.tiles[y2][x])
+                        if self.tiles[y2][x].shine then
+                            for i = 1, 8 do table.insert(match, self.tiles[i][x]) end
+                            break
+                        else
+                            -- add each tile to the match that's in that match
+                            table.insert(match, self.tiles[y2][x])
+                        end
                     end
 
                     table.insert(matches, match)
