@@ -45,6 +45,75 @@ function Board:initializeTiles()
     end
 end
 
+
+
+function Board:findMatches()
+    for y =1, 8 do
+        for x = 1, 8 do
+            if x > 1 then
+                self:swap(self.tiles[y][x], self.tiles[y][x-1])
+                if self:calculateMatches() then
+                    self:swap(self.tiles[y][x], self.tiles[y][x-1])
+                    return true
+                else
+                    self:swap(self.tiles[y][x], self.tiles[y][x-1])
+                end
+            end
+
+            if x < 8 then
+                self:swap(self.tiles[y][x], self.tiles[y][x+1])
+                if self:calculateMatches() then
+                    self:swap(self.tiles[y][x], self.tiles[y][x+1])
+                    return true
+                else
+                    self:swap(self.tiles[y][x], self.tiles[y][x+1])
+                end
+            end
+
+            if y > 1 then
+                self:swap(self.tiles[y][x], self.tiles[y-1][x])
+                if self:calculateMatches() then
+                    self:swap(self.tiles[y][x], self.tiles[y-1][x])
+                    return true
+                else
+                    self:swap(self.tiles[y][x], self.tiles[y-1][x])
+                end
+            end
+
+            if y < 8 then
+                self:swap(self.tiles[y][x], self.tiles[y+1][x])
+                if self:calculateMatches() then
+                    self:swap(self.tiles[y][x], self.tiles[y+1][x])
+                    return true
+                else
+                    self:swap(self.tiles[y][x], self.tiles[y+1][x])
+                end
+            end
+        end
+    end
+
+    return false
+end
+
+
+function Board:swap(tile1, tile2, back)
+    -- swap grid positions of tiles
+    local tempX = tile1.gridX
+    local tempY = tile1.gridY
+
+    tile1.gridX = tile2.gridX
+    tile1.gridY = tile2.gridY
+    tile2.gridX = tempX
+    tile2.gridY = tempY
+
+    -- swap tiles in the tiles table
+    self.tiles[tile1.gridY][tile1.gridX] = tile1
+    self.tiles[tile2.gridY][tile2.gridX] = tile2
+
+end
+
+
+
 --[[
     Goes left to right, top to bottom in the board, calculating matches by counting consecutive
     tiles of the same color. Doesn't need to check the last tile in every row or column if the 
@@ -172,6 +241,8 @@ function Board:calculateMatches()
     -- return matches table if > 0, else just return false
     return #self.matches > 0 and self.matches or false
 end
+
+
 
 --[[
     Remove the matches from the Board by just setting the Tile slots within

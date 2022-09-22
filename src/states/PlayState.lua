@@ -18,7 +18,7 @@ PlayState = Class{__includes = BaseState}
 function PlayState:init()
     
     -- start our transition alpha at full, so we fade in
-    self.transitionAlpha = 1
+    self.transitionAlpha = 0
 
     -- position in the grid which we're highlighting
     self.boardHighlightX = 0
@@ -34,6 +34,8 @@ function PlayState:init()
     self.highlightedTile = nil
 
     self.score = 0
+
+    self.resetting = false
 
     -- set our Timer class to turn cursor highlight on and off
     Timer.every(0.5, function()
@@ -139,34 +141,7 @@ function PlayState:update(dt)
                 gSounds['error']:play()
                 self.highlightedTile = nil
             else
-                
-                -- swap grid positions of tiles
-                local tempX = self.highlightedTile.gridX
-                local tempY = self.highlightedTile.gridY
-
-                local newTile = self.board.tiles[y][x]
-
-                self.highlightedTile.gridX = newTile.gridX
-                self.highlightedTile.gridY = newTile.gridY
-                newTile.gridX = tempX
-                newTile.gridY = tempY
-
-                -- swap tiles in the tiles table
-                self.board.tiles[self.highlightedTile.gridY][self.highlightedTile.gridX] =
-                    self.highlightedTile
-
-                self.board.tiles[newTile.gridY][newTile.gridX] = newTile
-
-                -- tween coordinates between the two so they swap
-                Timer.tween(0.1, {
-                    [self.highlightedTile] = {x = newTile.x, y = newTile.y},
-                    [newTile] = {x = self.highlightedTile.x, y = self.highlightedTile.y}
-                })
-                
-                -- once the swap is finished, we can tween falling blocks as needed
-                :finish(function()
-                    self:calculateMatches()
-                end)
+                self:tween(self.highlightedTile, self.board.tiles[y][x], true)
             end
         end
     end
@@ -181,11 +156,11 @@ end
     to the Board class.
 ]]
 
-function PlayState:calculateMatches()
+function PlayState:calculateMatches(entermatches)
     self.highlightedTile = nil
 
     -- if we have any matches, remove them and tween the falling blocks that result
-    local matches = self.board:calculateMatches()
+    local matches = entermatches or self.board:calculateMatches()
 
     if matches then
         gSounds['match']:stop()
@@ -213,10 +188,44 @@ function PlayState:calculateMatches()
             -- as a result of falling blocks once new blocks have finished falling
             self:calculateMatches()
         end)
+
+        if not self.board:findMatches() then
+            self.resetting = true
+            gSounds['error']:play()
+            Timer.tween(0.2,{
+                [self] = {transitionAlpha = 1}
+            })
+        end
     
-    -- if no matches, we can continue playing
     else
         self.canInput = true
+    end
+end
+
+function PlayState:tween(tile1, tile2, restricted)
+    self.board:swap(tile1, tile2)
+
+    if restricted then
+        Timer.tween(0.1,{
+            [tile1] = {x = tile2.x, y = tile2.y},
+            [tile2] = {x = tile1.x, y = tile1.y}
+            })
+        :finish(function()
+            local matches = self.board:calculateMatches()
+            if matches then
+                self:calculateMatches(matches)
+            else
+                gSounds['error']:play()
+                self:tween(tile1, tile2, false)
+                self.highlightedTile = nil
+            end
+
+        end)
+    else
+        Timer.tween(0.1,{
+            [tile1] = {x = tile2.x, y = tile2.y},
+            [tile2] = {x = tile1.x, y = tile1.y}
+            })        
     end
 end
 
@@ -260,4 +269,7 @@ function PlayState:render()
     love.graphics.printf('Score: ' .. tostring(self.score), 20, 52, 182, 'center')
     love.graphics.printf('Goal : ' .. tostring(self.scoreGoal), 20, 80, 182, 'center')
     love.graphics.printf('Timer: ' .. tostring(self.timer), 20, 108, 182, 'center')
+    love.graphics.setColor(1, 1, 1, self.transitionAlpha)
+    love.graphics.rectangle('fill', 0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT, self.transitionAlpha)
+
 end
