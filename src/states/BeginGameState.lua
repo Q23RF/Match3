@@ -28,7 +28,10 @@ end
 function BeginGameState:enter(def)
     
     -- grab level # from the def we're passed
+    self.resetting = def.resetting or false
     self.level = def.level
+    self.timer = def.timer or 50 + 10 * self.level
+    self.score = def.score or 0
     self.board = Board(VIRTUAL_WIDTH - 272, 16, self.level)
     while not self.board:findMatches() do
         self.board = Board(VIRTUAL_WIDTH - 272, 16, self.level)
@@ -64,6 +67,7 @@ function BeginGameState:enter(def)
                 :finish(function()
                     gStateMachine:change('play', {
                         level = self.level,
+                        score = self.score,
                         board = self.board
                     })
                 end)
@@ -86,9 +90,14 @@ function BeginGameState:render()
     love.graphics.rectangle('fill', 0, self.levelLabelY - 8, VIRTUAL_WIDTH, 48)
     love.graphics.setColor(1, 1, 1, 1)
     love.graphics.setFont(gFonts['large'])
-    love.graphics.printf('Level ' .. tostring(self.level),
-        0, self.levelLabelY, VIRTUAL_WIDTH, 'center')
 
+    if self.resetting then
+    love.graphics.printf('resetting...',
+            0, self.levelLabelY, VIRTUAL_WIDTH, 'center')
+    else
+        love.graphics.printf('Level ' .. tostring(self.level),
+            0, self.levelLabelY, VIRTUAL_WIDTH, 'center')
+    end
     -- our transition foreground rectangle
     love.graphics.setColor(1, 1, 1, self.transitionAlpha)
     love.graphics.rectangle('fill', 0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT)

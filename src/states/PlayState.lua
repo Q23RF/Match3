@@ -35,8 +35,6 @@ function PlayState:init()
 
     self.score = 0
 
-    self.resetting = false
-
     -- set our Timer class to turn cursor highlight on and off
     Timer.every(0.5, function()
         self.rectHighlighted = not self.rectHighlighted
@@ -57,7 +55,7 @@ function PlayState:enter(params)
     
     -- grab level # from the params we're passed
     self.level = params.level
-    self.timer = 50 + 10 * self.level
+    self.timer = params.timer or 50 + 10 * self.level
 
     -- spawn a board and place it toward the right
     self.board = params.board or Board(VIRTUAL_WIDTH - 272, 16, self.level)
@@ -66,10 +64,12 @@ function PlayState:enter(params)
     self.score = params.score or 0
 
     -- score we have to reach to get to the next level
-    self.scoreGoal = self.level * 0.75 * 1000 - 100
+    self.scoreGoal = self.level * 1.25 * 1000 -100
 end
 
 function PlayState:update(dt)
+
+
     if love.keyboard.wasPressed('escape') then
         love.event.quit()
     end
@@ -146,7 +146,13 @@ function PlayState:update(dt)
         end
     end
 
-    Timer.update(dt)
+
+
+    if self.board:findMatches() then
+        Timer.update(dt)
+    end
+
+    
 end
 
 --[[
@@ -189,16 +195,34 @@ function PlayState:calculateMatches(entermatches)
             self:calculateMatches()
         end)
 
-        if not self.board:findMatches() then
-            self.resetting = true
-            gSounds['error']:play()
-            Timer.tween(0.2,{
-                [self] = {transitionAlpha = 1}
-            })
-        end
+
     
     else
         self.canInput = true
+    end
+
+--[[
+    if not self.board:findMatches() then
+        gSounds['error']:play()
+        Timer.tween(0.2,{
+            [self] = {transitionAlpha = 1}
+        }):finish(function()
+            Timer.tween(0.2,{
+                [self] = {transitionAlpha = 0}
+            }):finish(function()
+                self.board = Board(VIRTUAL_WIDTH - 272, 16, self.level)
+            end)
+        end)
+    end
+
+]]--
+
+    if not self.board:findMatches() then
+        gStateMachine:change('begin-game', {
+            level = self.level,
+            timer = self,timer,
+            score = self.score
+        })
     end
 end
 
