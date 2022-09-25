@@ -43,11 +43,6 @@ function PlayState:init()
     -- subtract 1 from timer every second
     Timer.every(1, function()
         self.timer = self.timer - 1
-
-        -- play warning sound on timer if we get low
-        if self.timer <= 5 then
-            gSounds['clock']:play()
-        end
     end)
 end
 
@@ -55,7 +50,7 @@ function PlayState:enter(params)
     
     -- grab level # from the params we're passed
     self.level = params.level
-    self.timer = params.timer or 55 + 5 * self.level
+    self.timer = params.timer
 
     -- spawn a board and place it toward the right
     self.board = params.board or Board(VIRTUAL_WIDTH - 272, 16, self.level)
@@ -64,7 +59,7 @@ function PlayState:enter(params)
     self.score = params.score or 0
 
     -- score we have to reach to get to the next level
-    self.scoreGoal = self.level * 2.5 * 1000 - 100
+    self.scoreGoal = self.level * 2.8 * 1000 - 700
 end
 
 function PlayState:update(dt)
@@ -105,6 +100,32 @@ function PlayState:update(dt)
     end
 
     if self.canInput then
+
+--[[
+        local clicked = {}
+        if love.mouse.isDown(1) then
+            local dragging = true
+            mposX, mposY = push:toGame(love.mouse.getX(), love.mouse.getY())
+            
+            for k, tile in pairs(self.board.tiles) do
+                if tile.x < mposX and mposX < tile.x + 32 then
+                    table.insert(tile, clicked)
+                end
+            end
+
+            if #clicked == 2 then
+                self.highlightedTile = clicked[1]
+                if math.abs(self.highlightedTile.gridX - x) + math.abs(self.highlightedTile.gridY - y) > 1 then
+                    gSounds['error']:play()
+                    self.highlightedTile = nil
+                else
+                    self:tween(self.highlightedTile, self.board.tiles[y][x], true)
+                end
+            end
+        end
+]]--
+
+
         -- move cursor around based on bounds of grid, playing sounds
         if love.keyboard.wasPressed('up') then
             self.boardHighlightY = math.max(0, self.boardHighlightY - 1)
@@ -151,8 +172,6 @@ function PlayState:update(dt)
     if self.board:findMatches() then
         Timer.update(dt)
     end
-
-    
 end
 
 --[[
