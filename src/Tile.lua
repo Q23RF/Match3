@@ -26,7 +26,7 @@ function Tile:init(x, y, color, variety)
     -- tile appearance/points
     self.color = color==7 and 6 or color
     self.variety = variety
-    self.shine = math.random(3)==1 and true or false
+    self.shine = math.random(15)==1 and true or false
     if self.shine then
 
     end

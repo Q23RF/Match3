@@ -30,7 +30,7 @@ function BeginGameState:enter(def)
     -- grab level # from the def we're passed
     self.resetting = def.resetting or false
     self.level = def.level
-    self.timer = def.timer or 50 + 10 * self.level
+    self.timer = def.timer or 55 + 5 * self.level
     self.score = def.score or 0
     self.board = Board(VIRTUAL_WIDTH - 272, 16, self.level)
     while not self.board:findMatches() do
@@ -68,7 +68,8 @@ function BeginGameState:enter(def)
                     gStateMachine:change('play', {
                         level = self.level,
                         score = self.score,
-                        board = self.board
+                        board = self.board,
+                        timer = self.timer
                     })
                 end)
             end)

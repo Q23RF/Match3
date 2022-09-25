@@ -55,7 +55,7 @@ function PlayState:enter(params)
     
     -- grab level # from the params we're passed
     self.level = params.level
-    self.timer = params.timer or 50 + 10 * self.level
+    self.timer = params.timer or 55 + 5 * self.level
 
     -- spawn a board and place it toward the right
     self.board = params.board or Board(VIRTUAL_WIDTH - 272, 16, self.level)
@@ -64,7 +64,7 @@ function PlayState:enter(params)
     self.score = params.score or 0
 
     -- score we have to reach to get to the next level
-    self.scoreGoal = self.level * 1.25 * 1000 -100
+    self.scoreGoal = self.level * 2.5 * 1000 - 100
 end
 
 function PlayState:update(dt)
@@ -220,7 +220,7 @@ function PlayState:calculateMatches(entermatches)
     if not self.board:findMatches() then
         gStateMachine:change('begin-game', {
             level = self.level,
-            timer = self,timer,
+            timer = self.timer,
             score = self.score
         })
     end
