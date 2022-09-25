@@ -101,30 +101,6 @@ function PlayState:update(dt)
 
     if self.canInput then
 
---[[
-        local clicked = {}
-        if love.mouse.isDown(1) then
-            local dragging = true
-            mposX, mposY = push:toGame(love.mouse.getX(), love.mouse.getY())
-            
-            for k, tile in pairs(self.board.tiles) do
-                if tile.x < mposX and mposX < tile.x + 32 then
-                    table.insert(tile, clicked)
-                end
-            end
-
-            if #clicked == 2 then
-                self.highlightedTile = clicked[1]
-                if math.abs(self.highlightedTile.gridX - x) + math.abs(self.highlightedTile.gridY - y) > 1 then
-                    gSounds['error']:play()
-                    self.highlightedTile = nil
-                else
-                    self:tween(self.highlightedTile, self.board.tiles[y][x], true)
-                end
-            end
-        end
-]]--
-
 
         -- move cursor around based on bounds of grid, playing sounds
         if love.keyboard.wasPressed('up') then
